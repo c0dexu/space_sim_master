@@ -1,0 +1,63 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass';
+import { Galaxy } from './Entities/galaxy.js';
+import { Starship } from './Entities/starship.js';
+
+const canvas = document.querySelector('#c');
+const renderer = new THREE.WebGLRenderer({ canvas });
+
+const fov = 65;
+const aspect = 2; // the canvas default
+const near = 0.1;
+const far = 10000;
+const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+const controls = new OrbitControls(camera, renderer.domElement);
+const scene = new THREE.Scene();
+const galaxy = new Galaxy(0, 0, 0, 500);
+
+const starship = new Starship(scene, 0, 0, 0);
+
+const asdf = new THREE.SphereGeometry(10);
+const sdf = new THREE.MeshPhongMaterial();
+sdf.color.setRGB(0.25, 0.3, 0.01);
+const qwert = new THREE.Mesh(asdf, sdf);
+
+const light = new THREE.HemisphereLight(0xffffff, 0x4a4a4a, 1);
+scene.add(light);
+
+const composer = new EffectComposer(renderer);
+
+galaxy.generateSimpleSpiral(10, 1, 0.25, 0.35, 20, 0.25, 1);
+
+camera.position.z = 5;
+console.log(canvas.clientHeight);
+controls.target = galaxy.obj3d.position;
+controls.update();
+scene.add(galaxy.obj3d);
+
+function resizeRendererToDisplaySize(renderer) {
+  const canvas = renderer.domElement;
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  const needResize = canvas.width !== width || canvas.height !== height;
+  if (needResize) {
+    renderer.setSize(width, height, false);
+  }
+  return needResize;
+}
+
+function render(time) {
+  renderer.render(scene, camera);
+  controls.update();
+
+  if (resizeRendererToDisplaySize(renderer)) {
+    const canvas = renderer.domElement;
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+  }
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);

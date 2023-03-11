@@ -12,11 +12,11 @@ const renderer = new THREE.WebGLRenderer({ canvas });
 const fov = 65;
 const aspect = 2; // the canvas default
 const near = 0.1;
-const far = 10000;
+const far = 100;
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 const controls = new OrbitControls(camera, renderer.domElement);
 const scene = new THREE.Scene();
-const galaxy = new Galaxy(0, 0, 0, 500);
+const galaxy = new Galaxy(0, 0, 0, 900);
 
 const starship = new Starship(scene, 0, 0, 0);
 
@@ -46,25 +46,25 @@ controls.update();
 scene.add(galaxy.obj3d);
 composer.renderer.domElement = canvas;
 
-function resizeRendererToDisplaySize(renderer) {
-  const canvas = renderer.domElement;
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const needResize = canvas.width !== width || canvas.height !== height;
-  if (needResize) {
-    renderer.setSize(width, height, false);
-  }
-  return needResize;
+onWindowResize();
+
+function onWindowResize() {
+  console.log('resize');
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(width, height);
+  composer.setSize(width, height);
 }
+
+window.addEventListener('resize', onWindowResize);
 
 function render(time) {
   controls.update();
 
-  if (resizeRendererToDisplaySize(composer)) {
-    const canvas = renderer.domElement;
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-    camera.updateProjectionMatrix();
-  }
   composer.render();
   //   composer.renderer.render();
 

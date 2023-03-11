@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { Galaxy } from './Entities/galaxy.js';
 import { Starship } from './Entities/starship.js';
 
@@ -30,6 +30,13 @@ scene.add(light);
 
 const composer = new EffectComposer(renderer);
 
+const renderPass = new RenderPass(scene, camera);
+
+const bloomPass = new UnrealBloomPass();
+
+composer.addPass(renderPass);
+composer.addPass(bloomPass);
+
 galaxy.generateSimpleSpiral(10, 1, 0.25, 0.35, 20, 0.25, 1);
 
 camera.position.z = 5;
@@ -37,6 +44,7 @@ console.log(canvas.clientHeight);
 controls.target = galaxy.obj3d.position;
 controls.update();
 scene.add(galaxy.obj3d);
+composer.renderer.domElement = canvas;
 
 function resizeRendererToDisplaySize(renderer) {
   const canvas = renderer.domElement;
@@ -50,14 +58,16 @@ function resizeRendererToDisplaySize(renderer) {
 }
 
 function render(time) {
-  renderer.render(scene, camera);
   controls.update();
 
-  if (resizeRendererToDisplaySize(renderer)) {
+  if (resizeRendererToDisplaySize(composer)) {
     const canvas = renderer.domElement;
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
   }
+  composer.render();
+  //   composer.renderer.render();
+
   requestAnimationFrame(render);
 }
 requestAnimationFrame(render);

@@ -35,11 +35,14 @@ export class Galaxy {
         star.starMesh.position.set(x + dx, y + dy, z + dz);
         star.galaxyReference = this;
         star.calculateStarColor(50 + Math.random(0, 1) * 30000);
+        star.starMesh.layers.enable(1);
         this.stars.push(star);
         this.obj3d.add(star.starMesh);
+
         i += 1;
       }
     }
+    console.log(this.stars.length);
     this.boundingBox = new THREE.Box3().setFromObject(this.obj3d);
   }
 }

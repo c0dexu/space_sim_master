@@ -46,6 +46,8 @@ controls.update();
 scene.add(galaxy.obj3d);
 composer.renderer.domElement = canvas;
 
+camera.layers.enable(1);
+
 onWindowResize();
 
 function onWindowResize() {
@@ -63,11 +65,14 @@ function onWindowResize() {
 window.addEventListener('resize', onWindowResize);
 
 function render(time) {
-  controls.update();
-
-  composer.render();
-  //   composer.renderer.render();
-
   requestAnimationFrame(render);
+  renderer.autoClear = false;
+  renderer.clear();
+  camera.layers.set(1);
+  composer.render();
+  renderer.clearDepth();
+  camera.layers.set(0);
+  renderer.render(scene, camera);
+  controls.update();
 }
 requestAnimationFrame(render);

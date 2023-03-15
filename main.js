@@ -34,6 +34,8 @@ const renderPass = new RenderPass(scene, camera);
 
 const bloomPass = new UnrealBloomPass();
 
+bloomPass.renderToScreen = true;
+
 composer.addPass(renderPass);
 composer.addPass(bloomPass);
 

@@ -12,7 +12,7 @@ const renderer = new THREE.WebGLRenderer({ canvas });
 const fov = 65;
 const aspect = 2; // the canvas default
 const near = 0.1;
-const far = 100;
+const far = 200;
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 const controls = new OrbitControls(camera, renderer.domElement);
 const scene = new THREE.Scene();
@@ -36,13 +36,18 @@ const bloomPass = new UnrealBloomPass();
 
 bloomPass.renderToScreen = true;
 
+bloomPass.strength = 1.5;
+// bloomPass.radius = 1.25;
+
 composer.addPass(renderPass);
 composer.addPass(bloomPass);
+
+controls.enablePan = false;
+controls.enableZoom = false;
 
 galaxy.generateSimpleSpiral(10, 1, 0.25, 0.35, 20, 0.25, 1);
 
 camera.position.z = 5;
-console.log(canvas.clientHeight);
 controls.target = galaxy.obj3d.position;
 controls.update();
 scene.add(galaxy.obj3d);
@@ -66,7 +71,13 @@ function onWindowResize() {
 
 window.addEventListener('resize', onWindowResize);
 
+var direction = new THREE.Vector3();
+var cameraOffset = 5;
+
 function render(time) {
+  direction.subVectors(camera.position, controls.target);
+  direction.normalize().multiplyScalar(cameraOffset);
+  camera.position.copy(direction.add(controls.target));
   requestAnimationFrame(render);
   renderer.autoClear = false;
   renderer.clear();

@@ -28,8 +28,8 @@ export class StarParticle extends Entity {
       this.planeMaterial.color.setRGB(196 / 255, 73 / 255, 59 / 255);
     }
 
-    if (temperature >= 10000) {
-      this.planeMaterial.color.setRGB(148 / 255, 146 / 255, 247 / 255);
+    if (temperature >= 10000 && temperature < 30000) {
+      this.planeMaterial.color.setRGB(232 / 255, 247 / 255, 251 / 255);
     }
 
     if (temperature >= 30000) {

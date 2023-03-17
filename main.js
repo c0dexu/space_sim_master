@@ -18,7 +18,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 const scene = new THREE.Scene();
 const galaxy = new Galaxy(0, 0, 0, 900);
 
-const starship = new Starship(scene, 0, 0, 0);
+const starship = new Starship(controls, scene, camera, 0, 0, 0, 1);
 
 const asdf = new THREE.SphereGeometry(10);
 const sdf = new THREE.MeshPhongMaterial();
@@ -45,10 +45,11 @@ composer.addPass(bloomPass);
 controls.enablePan = false;
 controls.enableZoom = false;
 
-galaxy.generateSimpleSpiral(10, 1, 0.25, 0.35, 20, 0.25, 1);
+controls.update();
+
+galaxy.generateSimpleSpiral(15, 1, 0.25, 0.35, 100, 0.25, 1);
 
 camera.position.z = 5;
-controls.target = galaxy.obj3d.position;
 controls.update();
 scene.add(galaxy.obj3d);
 composer.renderer.domElement = canvas;
@@ -75,10 +76,7 @@ var direction = new THREE.Vector3();
 var cameraOffset = 5;
 
 function render(time) {
-  direction.subVectors(camera.position, controls.target);
-  direction.normalize().multiplyScalar(cameraOffset);
-  camera.position.copy(direction.add(controls.target));
-  requestAnimationFrame(render);
+  camera.updateProjectionMatrix();
   renderer.autoClear = false;
   renderer.clear();
   camera.layers.set(1);
@@ -86,6 +84,11 @@ function render(time) {
   renderer.clearDepth();
   camera.layers.set(0);
   renderer.render(scene, camera);
+  direction.subVectors(camera.position, controls.target);
+  direction.normalize().multiplyScalar(cameraOffset);
   controls.update();
+  starship.update(0.1);
+  camera.position.copy(direction.add(controls.target));
+  requestAnimationFrame(render);
 }
 requestAnimationFrame(render);

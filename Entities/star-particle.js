@@ -10,7 +10,7 @@ export class StarParticle extends Entity {
   temperature;
   constructor(x, y, z) {
     super(x, y, z, 0, 0, 0, 1);
-    this.planeGeometry = new THREE.SphereGeometry(0.035, 20, 20);
+    this.planeGeometry = new THREE.SphereGeometry(0.1, 20, 20);
     this.planeMaterial = new THREE.MeshBasicMaterial();
     this.planeMaterial.color.setRGB(1, 1, 1);
     this.starMesh = new THREE.Mesh(this.planeGeometry, this.planeMaterial);

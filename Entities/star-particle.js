@@ -7,6 +7,7 @@ export class StarParticle extends Entity {
   galaxyReference;
   starMesh;
   lodStar;
+  light;
   temperature;
   constructor(x, y, z) {
     super(x, y, z, 0, 0, 0, 1);

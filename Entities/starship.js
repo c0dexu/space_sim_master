@@ -6,21 +6,45 @@ export class Starship extends Entity {
   modelStarship;
   throttle = 0;
   camera;
-  force = 0.01;
+  force = 0.075;
   isStarshipLoaded = false;
   angle = 0;
   friction = 0.9;
   controls;
+  starshipMaterial;
+  lightTop;
+  lightBottom;
 
   constructor(controls, scene, camera, x, y, z, mass) {
     super(x, y, z, 0, 0, 0, 0.25);
     this.controls = controls;
     this.mass = mass;
     this.camera = camera;
+    const meshes = [];
     const loader = new OBJLoader();
     loader.load('../models/starship.obj', (obj) => {
+      this.lightTop = new THREE.PointLight(0xffffff, 1.5);
+      this.lightBottom = new THREE.PointLight(0xffffff, 1);
+      scene.add(this.lightTop);
+      scene.add(this.lightBottom);
+      this.starshipMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        metalness: 0.78,
+        roughness: 0.078,
+      });
       this.isStarshipLoaded = true;
       this.modelStarship = obj;
+
+      obj.traverse((child) => {
+        meshes.push(child);
+      });
+
+      console.log(meshes);
+
+      meshes.forEach((mesh) => {
+        mesh.material = this.starshipMaterial;
+      });
+
       this.controls.target = obj.position;
       scene.add(obj);
       document.addEventListener('keydown', (event) => {
@@ -55,27 +79,55 @@ export class Starship extends Entity {
       dy /= magnitude;
       dz /= magnitude;
 
-      const fx = this.force * dx * this.throttle;
-      const fy = this.force * dy * this.throttle;
-      const fz = this.force * dz * this.throttle;
-
-      this.vx += (fx / this.mass) * dt;
-      this.vy += (fy / this.mass) * dt;
-      this.vz += (fz / this.mass) * dt;
+      const fx =
+        this.force *
+        (starShipDirection.x / starShipDirection.length()) *
+        this.throttle;
+      const fy =
+        this.force *
+        (starShipDirection.y / starShipDirection.length()) *
+        this.throttle;
+      const fz =
+        this.force *
+        (starShipDirection.z / starShipDirection.length()) *
+        this.throttle;
 
       if (this.throttle === 0) {
         this.vx *= this.friction;
         this.vy *= this.friction;
         this.vz *= this.friction;
+      } else {
+        this.vx += (fx / this.mass) * dt;
+        this.vy += (fy / this.mass) * dt;
+        this.vz += (fz / this.mass) * dt;
       }
 
-      const cross = cameraDirection.cross(starShipDirection);
-      this.angle = (magnitude / this.mass) * this.throttle * 0.1;
-      this.modelStarship.rotateOnAxis(cross, this.angle);
+      var cross = cameraDirection.cross(starShipDirection);
+      cross = cross.normalize();
+
+      var steer = new THREE.Vector3(dx, dy, dz);
+      var finalVector = new THREE.Vector3();
+      finalVector.x = starShipDirection.x - steer.x * dt * this.throttle;
+      finalVector.y = starShipDirection.y - steer.y * dt * this.throttle;
+      finalVector.z = starShipDirection.z - steer.z * dt * this.throttle;
+
+      this.modelStarship.lookAt(finalVector);
 
       this.modelStarship.position.x += this.vx * dt;
       this.modelStarship.position.y += this.vy * dt;
       this.modelStarship.position.z += this.vz * dt;
+
+      this.lightTop.position.set(
+        this.modelStarship.position.x,
+        this.modelStarship.position.y + 3,
+        this.modelStarship.position.z
+      );
+
+      this.lightBottom.position.set(
+        this.modelStarship.position.x,
+        this.modelStarship.position.y - 3,
+        this.modelStarship.position.z
+      );
     }
   }
 }

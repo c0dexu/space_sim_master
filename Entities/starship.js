@@ -14,6 +14,7 @@ export class Starship extends Entity {
   starshipMaterial;
   lightTop;
   lightBottom;
+  maxVelocity = 2;
 
   constructor(controls, scene, camera, x, y, z, mass) {
     super(x, y, z, 0, 0, 0, 0.25);
@@ -81,15 +82,15 @@ export class Starship extends Entity {
 
       const fx =
         this.force *
-        (starShipDirection.x / starShipDirection.length()) *
+        (cameraDirection.x / starShipDirection.length()) *
         this.throttle;
       const fy =
         this.force *
-        (starShipDirection.y / starShipDirection.length()) *
+        (cameraDirection.y / starShipDirection.length()) *
         this.throttle;
       const fz =
         this.force *
-        (starShipDirection.z / starShipDirection.length()) *
+        (cameraDirection.z / starShipDirection.length()) *
         this.throttle;
 
       if (this.throttle === 0) {
@@ -97,9 +98,21 @@ export class Starship extends Entity {
         this.vy *= this.friction;
         this.vz *= this.friction;
       } else {
-        this.vx += (fx / this.mass) * dt;
-        this.vy += (fy / this.mass) * dt;
-        this.vz += (fz / this.mass) * dt;
+        if (
+          this.vx * this.vx + this.vy * this.vy + this.vz * this.vz <
+          this.maxVelocity
+        ) {
+          this.vx += (fx / this.mass) * dt;
+          this.vy += (fy / this.mass) * dt;
+          this.vz += (fz / this.mass) * dt;
+        } else {
+          this.vx =
+            (this.maxVelocity * cameraDirection.x) / starShipDirection.length();
+          this.vy =
+            (this.maxVelocity * cameraDirection.y) / starShipDirection.length();
+          this.vz =
+            (this.maxVelocity * cameraDirection.z) / starShipDirection.length();
+        }
       }
 
       var cross = cameraDirection.cross(starShipDirection);
@@ -107,9 +120,9 @@ export class Starship extends Entity {
 
       var steer = new THREE.Vector3(dx, dy, dz);
       var finalVector = new THREE.Vector3();
-      finalVector.x = starShipDirection.x - steer.x * dt * this.throttle;
-      finalVector.y = starShipDirection.y - steer.y * dt * this.throttle;
-      finalVector.z = starShipDirection.z - steer.z * dt * this.throttle;
+      finalVector.x = starShipDirection.x - steer.x * dt * this.throttle * 2;
+      finalVector.y = starShipDirection.y - steer.y * dt * this.throttle * 2;
+      finalVector.z = starShipDirection.z - steer.z * dt * this.throttle * 2;
 
       this.modelStarship.lookAt(finalVector);
 
